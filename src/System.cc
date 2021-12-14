@@ -243,6 +243,29 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR, activeLC); // mSensor!=MONOCULAR);
     mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
 
+    if(mSensor==STEREO || mSensor==IMU_STEREO || mSensor==RGBD)
+    {
+        // for point cloud resolution
+        float resolution = fsSettings["PointCloudMapping.Resolution"];
+        float meank = fsSettings["meank"];
+        float thresh = fsSettings["thresh"];
+
+        mpPointCloudMapping = new PointCloudMapping(resolution, meank, thresh);
+        mpLocalMapper->SetPointCloudMapper(mpPointCloudMapping);
+        mpLoopCloser->SetPointCloudMapper(mpPointCloudMapping);
+        mpTracker->SetPointCloudMapper(mpPointCloudMapping);
+    }
+    //Initialize the Viewer thread and launch
+    // 创建并开启显示线程
+    if(bUseViewer)
+    {
+        mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile);
+        mptViewer = new thread(&Viewer::Run, mpViewer);
+        mpTracker->SetViewer(mpViewer);
+        mpLoopCloser->mpViewer = mpViewer;
+        mpViewer->both = mpFrameDrawer->both;
+    }
+
     //Set pointers between threads
     // 设置线程间的指针
     mpTracker->SetLocalMapper(mpLocalMapper);

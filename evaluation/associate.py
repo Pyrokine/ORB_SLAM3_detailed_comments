@@ -46,7 +46,7 @@ import os
 import numpy
 
 
-def read_file_list(filename,remove_bounds):
+def read_file_list(filename):
     """
     Reads a trajectory from a text file. 
     
@@ -64,8 +64,8 @@ def read_file_list(filename,remove_bounds):
     file = open(filename)
     data = file.read()
     lines = data.replace(","," ").replace("\t"," ").split("\n")
-    if remove_bounds:
-        lines = lines[100:-100]
+    #if remove_bounds:
+    #    lines = lines[100:-100]
     list = [[v.strip() for v in line.split(" ") if v.strip()!=""] for line in lines if len(line)>0 and line[0]!="#"]
     list = [(float(l[0]),l[1:]) for l in list if len(l)>1]
     return dict(list)
@@ -85,8 +85,8 @@ def associate(first_list, second_list,offset,max_difference):
     matches -- list of matched tuples ((stamp1,data1),(stamp2,data2))
     
     """
-    first_keys = first_list.keys()
-    second_keys = second_list.keys()
+    first_keys = list(first_list.keys())
+    second_keys = list(second_list.keys())
     potential_matches = [(abs(a - (b + offset)), a, b) 
                          for a in first_keys 
                          for b in second_keys 
