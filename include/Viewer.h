@@ -27,68 +27,71 @@
 
 #include <mutex>
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3 {
 
-class Tracking;
-class FrameDrawer;
-class MapDrawer;
-class System;
+    class Tracking;
 
-class Viewer
-{
-public:
-    Viewer(System* pSystem, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Tracking *pTracking, const string &strSettingPath);
+    class FrameDrawer;
 
-    // Main thread function. Draw points, keyframes, the current camera pose and the last processed
-    // frame. Drawing is refreshed according to the camera fps. We use Pangolin.
-    void Run();
+    class MapDrawer;
 
-    void RequestFinish();
+    class System;
 
-    void RequestStop();
+    class Viewer {
+    public:
+        Viewer(System *pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Tracking *pTracking, const string &strSettingPath);
 
-    bool isFinished();
+        // Main thread function. Draw points, keyframes, the current camera pose and the last processed
+        // frame. Drawing is refreshed according to the camera fps. We use Pangolin.
+        void Run();
 
-    bool isStopped();
+        void RequestFinish();
 
-    bool isStepByStep();
+        void RequestStop();
 
-    void Release();
+        bool isFinished();
 
-    void SetTrackingPause();
+        bool isStopped();
 
-    bool both;
-private:
+        bool isStepByStep();
 
-    bool ParseViewerParamFile(cv::FileStorage &fSettings);
+        void Release();
 
-    bool Stop();
+        void SetTrackingPause();
 
-    System* mpSystem;
-    FrameDrawer* mpFrameDrawer;
-    MapDrawer* mpMapDrawer;
-    Tracking* mpTracker;
+        bool both;
+    private:
 
-    // 1/fps in ms
-    double mT;
-    float mImageWidth, mImageHeight;
+        bool ParseViewerParamFile(cv::FileStorage &fSettings);
 
-    float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
+        bool Stop();
 
-    bool CheckFinish();
-    void SetFinish();
-    bool mbFinishRequested;
-    bool mbFinished;
-    std::mutex mMutexFinish;
+        System *mpSystem;
+        FrameDrawer *mpFrameDrawer;
+        MapDrawer *mpMapDrawer;
+        Tracking *mpTracker;
 
-    bool mbStopped;
-    bool mbStopRequested;
-    std::mutex mMutexStop;
+        // 1/fps in ms
+        double mT;
+        float mImageWidth, mImageHeight;
 
-    bool mbStopTrack;
+        float mViewpointX, mViewpointY, mViewpointZ, mViewpointF;
 
-};
+        bool CheckFinish();
+
+        void SetFinish();
+
+        bool mbFinishRequested;
+        bool mbFinished;
+        std::mutex mMutexFinish;
+
+        bool mbStopped;
+        bool mbStopRequested;
+        std::mutex mMutexStop;
+
+        bool mbStopTrack;
+
+    };
 
 }
 

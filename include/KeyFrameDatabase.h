@@ -36,52 +36,55 @@
 #include<mutex>
 
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3 {
 
-class KeyFrame;
-class Frame;
-class Map;
+    class KeyFrame;
+
+    class Frame;
+
+    class Map;
 
 
-class KeyFrameDatabase
-{
+    class KeyFrameDatabase {
 
-public:
+    public:
 
-    KeyFrameDatabase(const ORBVocabulary &voc);
+        KeyFrameDatabase(const ORBVocabulary &voc);
 
-   void add(KeyFrame* pKF);
+        void add(KeyFrame *pKF);
 
-   void erase(KeyFrame* pKF);
+        void erase(KeyFrame *pKF);
 
-   void clear();
-   void clearMap(Map* pMap);
+        void clear();
 
-   // Loop Detection(DEPRECATED)
-   std::vector<KeyFrame *> DetectLoopCandidates(KeyFrame* pKF, float minScore);
+        void clearMap(Map *pMap);
 
-   // Loop and Merge Detection
-   void DetectCandidates(KeyFrame* pKF, float minScore,vector<KeyFrame*>& vpLoopCand, vector<KeyFrame*>& vpMergeCand);
-   void DetectBestCandidates(KeyFrame *pKF, vector<KeyFrame*> &vpLoopCand, vector<KeyFrame*> &vpMergeCand, int nMinWords);
-   void DetectNBestCandidates(KeyFrame *pKF, vector<KeyFrame*> &vpLoopCand, vector<KeyFrame*> &vpMergeCand, int nNumCandidates);
+        // Loop Detection(DEPRECATED)
+        std::vector<KeyFrame *> DetectLoopCandidates(KeyFrame *pKF, float minScore);
 
-   // Relocalization
-   std::vector<KeyFrame*> DetectRelocalizationCandidates(Frame* F, Map* pMap);
+        // Loop and Merge Detection
+        void DetectCandidates(KeyFrame *pKF, float minScore, vector<KeyFrame *> &vpLoopCand, vector<KeyFrame *> &vpMergeCand);
 
-   void SetORBVocabulary(ORBVocabulary* pORBVoc);
+        void DetectBestCandidates(KeyFrame *pKF, vector<KeyFrame *> &vpLoopCand, vector<KeyFrame *> &vpMergeCand, int nMinWords);
 
-protected:
+        void DetectNBestCandidates(KeyFrame *pKF, vector<KeyFrame *> &vpLoopCand, vector<KeyFrame *> &vpMergeCand, int nNumCandidates);
 
-  // Associated vocabulary
-  const ORBVocabulary* mpVoc;
+        // Relocalization
+        std::vector<KeyFrame *> DetectRelocalizationCandidates(Frame *F, Map *pMap);
 
-  // Inverted file
-  std::vector<list<KeyFrame*> > mvInvertedFile;
+        void SetORBVocabulary(ORBVocabulary *pORBVoc);
 
-  // Mutex
-  std::mutex mMutex;
-};
+    protected:
+
+        // Associated vocabulary
+        const ORBVocabulary *mpVoc;
+
+        // Inverted file
+        std::vector<list<KeyFrame *> > mvInvertedFile;
+
+        // Mutex
+        std::mutex mMutex;
+    };
 
 } //namespace ORB_SLAM
 

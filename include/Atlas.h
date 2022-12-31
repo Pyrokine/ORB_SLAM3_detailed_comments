@@ -32,102 +32,122 @@
 #include <boost/serialization/export.hpp>
 
 
-namespace ORB_SLAM3
-{
-class Viewer;
-class Map;
-class MapPoint;
-class KeyFrame;
-class KeyFrameDatabase;
-class Frame;
-class KannalaBrandt8;
-class Pinhole;
+namespace ORB_SLAM3 {
+    class Viewer;
 
-class Atlas
-{
+    class Map;
 
-public:
-    Atlas();
-    Atlas(int initKFid); // When its initialization the first map is created
-    ~Atlas();
-    // 创建新地图
-    void CreateNewMap();
-    void ChangeMap(Map* pMap);
+    class MapPoint;
 
-    unsigned long int GetLastInitKFid();
+    class KeyFrame;
 
-    void SetViewer(Viewer* pViewer);
+    class KeyFrameDatabase;
 
-    // Method for change components in the current map
-    void AddKeyFrame(KeyFrame* pKF);
-    void AddMapPoint(MapPoint* pMP);
+    class Frame;
 
-    void AddCamera(GeometricCamera* pCam);
+    class KannalaBrandt8;
 
-    /* All methods without Map pointer work on current map */
-    void SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs);
-    void InformNewBigChange();
-    int GetLastBigChangeIdx();
+    class Pinhole;
 
-    long unsigned int MapPointsInMap();
-    long unsigned KeyFramesInMap();
+    class Atlas {
 
-    // Method for get data in current map
-    std::vector<KeyFrame*> GetAllKeyFrames();
-    std::vector<MapPoint*> GetAllMapPoints();
-    std::vector<MapPoint*> GetReferenceMapPoints();
+    public:
+        Atlas();
 
-    vector<Map*> GetAllMaps();
+        Atlas(int initKFid); // When its initialization the first map is created
+        ~Atlas();
 
-    int CountMaps();
+        // 创建新地图
+        void CreateNewMap();
 
-    void clearMap();
+        void ChangeMap(Map *pMap);
 
-    void clearAtlas();
+        unsigned long int GetLastInitKFid();
 
-    Map* GetCurrentMap();
+        void SetViewer(Viewer *pViewer);
 
-    void SetMapBad(Map* pMap);
-    void RemoveBadMaps();
+        // Method for change components in the current map
+        void AddKeyFrame(KeyFrame *pKF);
 
-    bool isInertial();
-    void SetInertialSensor();
-    void SetImuInitialized();
-    bool isImuInitialized();
+        void AddMapPoint(MapPoint *pMP);
 
-    void SetKeyFrameDababase(KeyFrameDatabase* pKFDB);
-    KeyFrameDatabase* GetKeyFrameDatabase();
+        void AddCamera(GeometricCamera *pCam);
 
-    void SetORBVocabulary(ORBVocabulary* pORBVoc);
-    ORBVocabulary* GetORBVocabulary();
+        /* All methods without Map pointer work on current map */
+        void SetReferenceMapPoints(const std::vector<MapPoint *> &vpMPs);
 
-    long unsigned int GetNumLivedKF();
+        void InformNewBigChange();
 
-    long unsigned int GetNumLivedMP();
+        int GetLastBigChangeIdx();
 
-protected:
+        long unsigned int MapPointsInMap();
 
-    std::set<Map*> mspMaps;     //存放所有的地图
-    std::set<Map*> mspBadMaps;
-    Map* mpCurrentMap;
+        long unsigned KeyFramesInMap();
 
-    std::vector<GeometricCamera*> mvpCameras;
-    std::vector<KannalaBrandt8*> mvpBackupCamKan;
-    std::vector<Pinhole*> mvpBackupCamPin;
+        // Method for get data in current map
+        std::vector<KeyFrame *> GetAllKeyFrames();
 
-    std::mutex mMutexAtlas;
+        std::vector<MapPoint *> GetAllMapPoints();
 
-    unsigned long int mnLastInitKFidMap;
+        std::vector<MapPoint *> GetReferenceMapPoints();
 
-    Viewer* mpViewer;
-    bool mHasViewer;
+        vector<Map *> GetAllMaps();
 
-    // Class references for the map reconstruction from the save file
-    KeyFrameDatabase* mpKeyFrameDB;
-    ORBVocabulary* mpORBVocabulary;
+        int CountMaps();
+
+        void clearMap();
+
+        void clearAtlas();
+
+        Map *GetCurrentMap();
+
+        void SetMapBad(Map *pMap);
+
+        void RemoveBadMaps();
+
+        bool isInertial();
+
+        void SetInertialSensor();
+
+        void SetImuInitialized();
+
+        bool isImuInitialized();
+
+        void SetKeyFrameDababase(KeyFrameDatabase *pKFDB);
+
+        KeyFrameDatabase *GetKeyFrameDatabase();
+
+        void SetORBVocabulary(ORBVocabulary *pORBVoc);
+
+        ORBVocabulary *GetORBVocabulary();
+
+        long unsigned int GetNumLivedKF();
+
+        long unsigned int GetNumLivedMP();
+
+    protected:
+
+        std::set<Map *> mspMaps;     //存放所有的地图
+        std::set<Map *> mspBadMaps;
+        Map *mpCurrentMap;
+
+        std::vector<GeometricCamera *> mvpCameras;
+        std::vector<KannalaBrandt8 *> mvpBackupCamKan;
+        std::vector<Pinhole *> mvpBackupCamPin;
+
+        std::mutex mMutexAtlas;
+
+        unsigned long int mnLastInitKFidMap;
+
+        Viewer *mpViewer;
+        bool mHasViewer;
+
+        // Class references for the map reconstruction from the save file
+        KeyFrameDatabase *mpKeyFrameDB;
+        ORBVocabulary *mpORBVocabulary;
 
 
-}; // class Atlas
+    }; // class Atlas
 
 } // namespace ORB_SLAM3
 

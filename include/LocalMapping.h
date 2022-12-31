@@ -30,177 +30,205 @@
 #include <mutex>
 
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3 {
 
-class System;
-class Tracking;
-class LoopClosing;
-class Atlas;
-class PointCloudMapping;
+    class System;
 
-class LocalMapping
-{
-public:
-    LocalMapping(System* pSys, Atlas* pAtlas, const float bMonocular, bool bInertial, const string &_strSeqName=std::string());
+    class Tracking;
 
-    void SetLoopCloser(LoopClosing* pLoopCloser);
+    class LoopClosing;
 
-    void SetTracker(Tracking* pTracker);
-    void SetPointCloudMapper(PointCloudMapping* pPointCloudMapping)
-    {
-        mpPointCloudMapping = pPointCloudMapping;
-    }
-    // Main function
-    void Run();
+    class Atlas;
 
-    void InsertKeyFrame(KeyFrame* pKF);
-    void EmptyQueue();
+    class PointCloudMapping;
 
-    // Thread Synch
-    void RequestStop();
-    void RequestReset();
-    void RequestResetActiveMap(Map* pMap);
-    bool Stop();
-    void Release();
-    bool isStopped();
-    bool stopRequested();
-    bool AcceptKeyFrames();
-    void SetAcceptKeyFrames(bool flag);
-    bool SetNotStop(bool flag);
+    class LocalMapping {
+    public:
+        LocalMapping(System *pSys, Atlas *pAtlas, const float bMonocular, bool bInertial, const string &_strSeqName = std::string());
 
-    void InterruptBA();
+        void SetLoopCloser(LoopClosing *pLoopCloser);
 
-    void RequestFinish();
-    bool isFinished();
+        void SetTracker(Tracking *pTracker);
 
-    int KeyframesInQueue(){
-        unique_lock<std::mutex> lock(mMutexNewKFs);
-        return mlNewKeyFrames.size();
-    }
+        void SetPointCloudMapper(PointCloudMapping *pPointCloudMapping) {
+            mpPointCloudMapping = pPointCloudMapping;
+        }
 
-    bool IsInitializing();
-    double GetCurrKFTime();
-    KeyFrame* GetCurrKF();
+        // Main function
+        void Run();
 
-    std::mutex mMutexImuInit;
+        void InsertKeyFrame(KeyFrame *pKF);
 
-    Eigen::MatrixXd mcovInertial;
-    Eigen::Matrix3d mRwg;
-    Eigen::Vector3d mbg;
-    Eigen::Vector3d mba;
-    double mScale;
-    double mInitTime;
-    double mCostTime;
-    bool mbNewInit;
-    unsigned int mInitSect;
-    unsigned int mIdxInit;
-    unsigned int mnKFs;
-    double mFirstTs;
-    int mnMatchesInliers;
+        void EmptyQueue();
 
-    bool mbNotBA1;
-    bool mbNotBA2;
-    bool mbBadImu;
+        // Thread Synch
+        void RequestStop();
 
-    bool mbWriteStats;
+        void RequestReset();
 
-    // not consider far points (clouds)
-    bool mbFarPoints;
-    float mThFarPoints;
+        void RequestResetActiveMap(Map *pMap);
+
+        bool Stop();
+
+        void Release();
+
+        bool isStopped();
+
+        bool stopRequested();
+
+        bool AcceptKeyFrames();
+
+        void SetAcceptKeyFrames(bool flag);
+
+        bool SetNotStop(bool flag);
+
+        void InterruptBA();
+
+        void RequestFinish();
+
+        bool isFinished();
+
+        int KeyframesInQueue() {
+            unique_lock<std::mutex> lock(mMutexNewKFs);
+            return mlNewKeyFrames.size();
+        }
+
+        bool IsInitializing();
+
+        double GetCurrKFTime();
+
+        KeyFrame *GetCurrKF();
+
+        std::mutex mMutexImuInit;
+
+        Eigen::MatrixXd mcovInertial;
+        Eigen::Matrix3d mRwg;
+        Eigen::Vector3d mbg;
+        Eigen::Vector3d mba;
+        double mScale;
+        double mInitTime;
+        double mCostTime;
+        bool mbNewInit;
+        unsigned int mInitSect;
+        unsigned int mIdxInit;
+        unsigned int mnKFs;
+        double mFirstTs;
+        int mnMatchesInliers;
+
+        bool mbNotBA1;
+        bool mbNotBA2;
+        bool mbBadImu;
+
+        bool mbWriteStats;
+
+        // not consider far points (clouds)
+        bool mbFarPoints;
+        float mThFarPoints;
 
 #ifdef REGISTER_TIMES
-    vector<double> vdKFInsert_ms;
-    vector<double> vdMPCulling_ms;
-    vector<double> vdMPCreation_ms;
-    vector<double> vdLBA_ms;
-    vector<double> vdKFCulling_ms;
-    vector<double> vdLMTotal_ms;
+        vector<double> vdKFInsert_ms;
+        vector<double> vdMPCulling_ms;
+        vector<double> vdMPCreation_ms;
+        vector<double> vdLBA_ms;
+        vector<double> vdKFCulling_ms;
+        vector<double> vdLMTotal_ms;
 
 
-    vector<double> vdLBASync_ms;
-    vector<double> vdKFCullingSync_ms;
-    vector<int> vnLBA_edges;
-    vector<int> vnLBA_KFopt;
-    vector<int> vnLBA_KFfixed;
-    vector<int> vnLBA_MPs;
-    int nLBA_exec;
-    int nLBA_abort;
+        vector<double> vdLBASync_ms;
+        vector<double> vdKFCullingSync_ms;
+        vector<int> vnLBA_edges;
+        vector<int> vnLBA_KFopt;
+        vector<int> vnLBA_KFfixed;
+        vector<int> vnLBA_MPs;
+        int nLBA_exec;
+        int nLBA_abort;
 #endif
-protected:
+    protected:
 
-    bool CheckNewKeyFrames();
-    void ProcessNewKeyFrame();
-    void CreateNewMapPoints();
+        bool CheckNewKeyFrames();
 
-    void MapPointCulling();
-    void SearchInNeighbors();
-    void KeyFrameCulling();
+        void ProcessNewKeyFrame();
 
-    cv::Mat ComputeF12(KeyFrame* &pKF1, KeyFrame* &pKF2);
-    cv::Matx33f ComputeF12_(KeyFrame* &pKF1, KeyFrame* &pKF2);
+        void CreateNewMapPoints();
 
-    cv::Mat SkewSymmetricMatrix(const cv::Mat &v);
-    cv::Matx33f SkewSymmetricMatrix_(const cv::Matx31f &v);
+        void MapPointCulling();
 
-    System *mpSystem;
+        void SearchInNeighbors();
 
-    bool mbMonocular;   //mSensor==MONOCULAR || mSensor==IMU_MONOCULAR
-    bool mbInertial;    //mSensor==IMU_MONOCULAR || mSensor==IMU_STEREO
+        void KeyFrameCulling();
 
-    void ResetIfRequested();
-    bool mbResetRequested;
-    bool mbResetRequestedActiveMap;
-    Map* mpMapToReset;
-    std::mutex mMutexReset;
+        cv::Mat ComputeF12(KeyFrame *&pKF1, KeyFrame *&pKF2);
 
-    bool CheckFinish();
-    void SetFinish();
-    bool mbFinishRequested;
-    bool mbFinished;
-    std::mutex mMutexFinish;
+        cv::Matx33f ComputeF12_(KeyFrame *&pKF1, KeyFrame *&pKF2);
 
-    Atlas* mpAtlas;
+        cv::Mat SkewSymmetricMatrix(const cv::Mat &v);
 
-    LoopClosing* mpLoopCloser;
-    Tracking* mpTracker;
-    PointCloudMapping* mpPointCloudMapping;
+        cv::Matx33f SkewSymmetricMatrix_(const cv::Matx31f &v);
 
-    std::list<KeyFrame*> mlNewKeyFrames, mlNewKeyFrameForDenseMap;
+        System *mpSystem;
 
-    KeyFrame* mpCurrentKeyFrame;
+        bool mbMonocular;   //mSensor==MONOCULAR || mSensor==IMU_MONOCULAR
+        bool mbInertial;    //mSensor==IMU_MONOCULAR || mSensor==IMU_STEREO
 
-    std::list<MapPoint*> mlpRecentAddedMapPoints;
+        void ResetIfRequested();
 
-    std::mutex mMutexNewKFs;
+        bool mbResetRequested;
+        bool mbResetRequestedActiveMap;
+        Map *mpMapToReset;
+        std::mutex mMutexReset;
 
-    bool mbAbortBA;
+        bool CheckFinish();
 
-    bool mbStopped;
-    bool mbStopRequested;
-    bool mbNotStop;
-    std::mutex mMutexStop;
+        void SetFinish();
 
-    bool mbAcceptKeyFrames;
-    std::mutex mMutexAccept;
-    // IMU初始化函数，通过控制不同的参数来表示不同阶段
-    void InitializeIMU(float priorG = 1e2, float priorA = 1e6, bool bFirst = false);
-    // 单目惯性模式下优化尺度和重力方向
-    void ScaleRefinement();
-    //跟踪线程使用，如果为true，暂不添加关键帧
-    bool bInitializing;
+        bool mbFinishRequested;
+        bool mbFinished;
+        std::mutex mMutexFinish;
 
-    Eigen::MatrixXd infoInertial;
-    int mNumLM;
-    int mNumKFCulling;
+        Atlas *mpAtlas;
 
-    float mTinit;
+        LoopClosing *mpLoopCloser;
+        Tracking *mpTracker;
+        PointCloudMapping *mpPointCloudMapping;
 
-    int countRefinement;
+        std::list<KeyFrame *> mlNewKeyFrames, mlNewKeyFrameForDenseMap;
 
-    //DEBUG
-    ofstream f_lm;
-};
+        KeyFrame *mpCurrentKeyFrame;
+
+        std::list<MapPoint *> mlpRecentAddedMapPoints;
+
+        std::mutex mMutexNewKFs;
+
+        bool mbAbortBA;
+
+        bool mbStopped;
+        bool mbStopRequested;
+        bool mbNotStop;
+        std::mutex mMutexStop;
+
+        bool mbAcceptKeyFrames;
+        std::mutex mMutexAccept;
+
+        // IMU初始化函数，通过控制不同的参数来表示不同阶段
+        void InitializeIMU(float priorG = 1e2, float priorA = 1e6, bool bFirst = false);
+
+        // 单目惯性模式下优化尺度和重力方向
+        void ScaleRefinement();
+
+        //跟踪线程使用，如果为true，暂不添加关键帧
+        bool bInitializing;
+
+        Eigen::MatrixXd infoInertial;
+        int mNumLM;
+        int mNumKFCulling;
+
+        float mTinit;
+
+        int countRefinement;
+
+        //DEBUG
+        ofstream f_lm;
+    };
 
 } //namespace ORB_SLAM
 

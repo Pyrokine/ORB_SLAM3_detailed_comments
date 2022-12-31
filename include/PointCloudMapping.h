@@ -21,73 +21,91 @@
 #define POINTCLOUDMAPPING_H
 
 #include <atomic>
-
 #include "System.h"
 #include <pcl/common/transforms.h>
-#include <pcl/point_types.h>
-#include <pcl/filters/voxel_grid.h>
-#include <condition_variable>
 #include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/statistical_outlier_removal.h>
-// using namespace ORB_SLAM3;
+#include <condition_variable>
+#include <KeyFrame.h>
+#include <opencv2/highgui/highgui.hpp>
+#include "Converter.h"
+#include <ctime>
+#include <sys/stat.h>
 
-namespace ORB_SLAM3
-{
 
-class PointCloudMapping
-{
-public:
-    // typedef pcl::PointXYZRGBA PointT;
-    // typedef pcl::PointCloud<PointT> PointCloud;
+namespace ORB_SLAM3 {
+    class PointCloudMapping {
+    public:
+        // typedef pcl::PointXYZRGBA PointT;
+        // typedef pcl::PointCloud<PointT> PointCloud;
 
-    PointCloudMapping(double resolution_, double meank_, double thresh_);
-    void save();
-    // 插入一个keyframe，会更新一次地图
-    void insertKeyFrame(KeyFrame *kf, cv::Mat &color, cv::Mat &depth, int idk, vector<KeyFrame *> vpKFs);
-    void insertKeyFrame(KeyFrame *kf);
-    void shutdown();
-    void viewer();
-    void inserttu(cv::Mat &color, cv::Mat &depth, int idk);
-    int mnloopcount = 0;
-    vector<KeyFrame *> currentvpKFs;
-    bool cloudbusy = false;
-    bool loopbusy = false;
-    void updatecloud(Map &curMap);
-    void Clear();
-    bool bStop = false;
+        PointCloudMapping(double resolution_, double meank_, double thresh_);
 
-    // 关于更新时的变量
-    std::atomic<bool> mabIsUpdating;
+        void init_pcd_name();
 
-protected:
-    void generatePointCloud(KeyFrame *kf);
+        void update_pcd_name();
 
-    std::list<KeyFrame *> mlNewKeyFrames;
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr globalMap;
-    shared_ptr<thread> viewerThread;
+        void save();
 
-    bool shutDownFlag = false;
-    std::mutex shutDownMutex;
+        // 插入一个keyframe，会更新一次地图
+        void insertKeyFrame(KeyFrame *kf);
 
-    condition_variable keyFrameUpdated;
-    std::mutex mMutexGlobalMap;
-    // vector<PointCloude>     pointcloud;
-    // data to generate point clouds
-    vector<KeyFrame *> keyframes;
-    vector<cv::Mat> colorImgs;
-    vector<cv::Mat> depthImgs;
-    vector<cv::Mat> colorImgks;
-    vector<cv::Mat> depthImgks;
-    vector<int> ids;
-    std::mutex keyframeMutex;
-    std::mutex updateMutex;
-    uint16_t lastKeyframeSize = 0;
+        void shutdown();
 
-    double resolution = 0.04;
-    double meank = 50;
-    double thresh = 1;
-    pcl::VoxelGrid<pcl::PointXYZRGBA> *voxel;
-    pcl::StatisticalOutlierRemoval<pcl::PointXYZRGBA> *statistical_filter;
-};
+        void viewer();
+
+        // void inserttu(cv::Mat &color, cv::Mat &depth, int idk);
+
+        int mnloopcount = 0;
+        vector<KeyFrame *> currentvpKFs;
+        bool cloudbusy = false;
+        bool loopbusy = false;
+
+        void updatecloud(Map &curMap);
+
+        void Clear();
+
+        bool bStop = false;
+
+        // 关于更新时的变量
+        std::atomic<bool> mabIsUpdating;
+
+    protected:
+        static void generatePointCloud(KeyFrame *kf);
+
+        std::list<KeyFrame *> mlNewKeyFrames;
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr globalMap;
+        shared_ptr<thread> viewerThread;
+
+        bool shutDownFlag = false;
+        std::mutex shutDownMutex;
+
+        condition_variable keyFrameUpdated;
+        std::mutex mMutexGlobalMap;
+        // vector<PointCloude>     pointcloud;
+        // data to generate point clouds
+        vector<KeyFrame *> keyframes;
+        vector<cv::Mat> colorImgs;
+        vector<cv::Mat> depthImgs;
+        vector<cv::Mat> colorImgks;
+        vector<cv::Mat> depthImgks;
+        vector<int> ids;
+        std::mutex keyframeMutex;
+        std::mutex updateMutex;
+        uint16_t lastKeyframeSize = 0;
+
+        double resolution = 0.04;
+        double meank = 50;
+        double thresh = 1;
+
+        pcl::VoxelGrid<pcl::PointXYZRGBA> *voxel;
+        pcl::StatisticalOutlierRemoval<pcl::PointXYZRGBA> *statistical_filter;
+
+        string pcd_folder = "pcd/", pcd_path = "";
+        int pcd_name = 0;
+    };
 }
 #endif // POINTCLOUDMAPPING_H

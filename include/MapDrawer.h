@@ -27,46 +27,50 @@
 
 #include<mutex>
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3 {
 
-class MapDrawer
-{
-public:
-    MapDrawer(Atlas* pAtlas, const string &strSettingPath);
+    class MapDrawer {
+    public:
+        MapDrawer(Atlas *pAtlas, const string &strSettingPath);
 
-    Atlas* mpAtlas;
+        Atlas *mpAtlas;
 
-    void DrawMapPoints();
-    void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph);
-    void DrawCurrentCamera(pangolin::OpenGlMatrix &Twc);
-    void SetCurrentCameraPose(const cv::Mat &Tcw);
-    void SetReferenceKeyFrame(KeyFrame *pKF);
-    void GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M, pangolin::OpenGlMatrix &MOw);
-    void GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M, pangolin::OpenGlMatrix &MOw, pangolin::OpenGlMatrix &MTwwp);
+        void DrawMapPoints();
 
-private:
+        void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph, const bool bDrawInertialGraph);
 
-    bool ParseViewerParamFile(cv::FileStorage &fSettings);
+        void DrawCurrentCamera(pangolin::OpenGlMatrix &Twc);
 
-    float mKeyFrameSize;
-    float mKeyFrameLineWidth;
-    float mGraphLineWidth;
-    float mPointSize;
-    float mCameraSize;
-    float mCameraLineWidth;
+        void SetCurrentCameraPose(const cv::Mat &Tcw);
 
-    cv::Mat mCameraPose;
+        void SetReferenceKeyFrame(KeyFrame *pKF);
 
-    std::mutex mMutexCamera;
+        void GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M, pangolin::OpenGlMatrix &MOw);
 
-    float mfFrameColors[6][3] = {{0.0f, 0.0f, 1.0f},
-                                {0.8f, 0.4f, 1.0f},
-                                {1.0f, 0.2f, 0.4f},
-                                {0.6f, 0.0f, 1.0f},
-                                {1.0f, 1.0f, 0.0f},
-                                {0.0f, 1.0f, 1.0f}};
-};
+        void GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M, pangolin::OpenGlMatrix &MOw, pangolin::OpenGlMatrix &MTwwp);
+
+    private:
+
+        bool ParseViewerParamFile(cv::FileStorage &fSettings);
+
+        float mKeyFrameSize;
+        float mKeyFrameLineWidth;
+        float mGraphLineWidth;
+        float mPointSize;
+        float mCameraSize;
+        float mCameraLineWidth;
+
+        cv::Mat mCameraPose;
+
+        std::mutex mMutexCamera;
+
+        float mfFrameColors[6][3] = {{0.0f, 0.0f, 1.0f},
+                                     {0.8f, 0.4f, 1.0f},
+                                     {1.0f, 0.2f, 0.4f},
+                                     {0.6f, 0.0f, 1.0f},
+                                     {1.0f, 1.0f, 0.0f},
+                                     {0.0f, 1.0f, 1.0f}};
+    };
 
 } //namespace ORB_SLAM
 
