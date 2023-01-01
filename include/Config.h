@@ -20,48 +20,34 @@
 #define CONFIG_H
 
 #include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <string>
 
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3 {
+    class ViewerConfig {
+    };
 
-class ViewerConfig
-{
+    class CameraConfig {
+    };
 
-};
+    class ORBExtractorConfig {
+    };
 
-class CameraConfig
-{
+    class IMUConfig {
+    };
 
-};
+    class ConfigParser {
+    public:
+        static bool ParseConfigFile(std::string &strConfigFile);
 
-class ORBExtractorConfig
-{
-
-};
-
-class IMUConfig
-{
-
-};
-
-class ConfigParser
-{
-public:
-    bool ParseConfigFile(std::string &strConfigFile);
-
-private:
-
-    ViewerConfig mViewerConfig;
-    CameraConfig mCameraConfig;
-    ORBExtractorConfig mORBConfig;
-    IMUConfig mIMUConfig;
-
-};
-
+    private:
+        ViewerConfig mViewerConfig;
+        CameraConfig mCameraConfig;
+        ORBExtractorConfig mORBConfig;
+        IMUConfig mIMUConfig;
+    };
 }
 
-#endif // CONFIG_H
+#endif  // CONFIG_H

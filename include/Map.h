@@ -30,179 +30,204 @@
 #include <boost/serialization/base_object.hpp>
 
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3 {
+    class MapPoint;
 
-class MapPoint;
-class KeyFrame;
-class Atlas;
-class KeyFrameDatabase;
+    class KeyFrame;
 
-class Map
-{
-    friend class boost::serialization::access;
+    class Atlas;
 
-    template<class Archive>
-    void serialize(Archive &ar, const unsigned int version)
-    {
-        ar & mnId;
-        ar & mnInitKFid;
-        ar & mnMaxKFid;
-        ar & mnBigChangeIdx;
+    class KeyFrameDatabase;
 
-        // Save/load a set structure, the set structure is broken in libboost 1.58 for ubuntu 16.04, a vector is serializated
-        //ar & mspKeyFrames;
-        //ar & mspMapPoints;
-        ar & mvpBackupKeyFrames;
-        ar & mvpBackupMapPoints;
+    class Map {
+        friend class boost::serialization::access;
 
-        ar & mvBackupKeyFrameOriginsId;
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+            ar & mnId;
+            ar & mnInitKFid;
+            ar & mnMaxKFid;
+            ar & mnBigChangeIdx;
 
-        ar & mnBackupKFinitialID;
-        ar & mnBackupKFlowerID;
+//          Save/load a set structure, the set structure is broken in libboost 1.58 for ubuntu 16.04, a vector is serializated
+//          ar & mspKeyFrames;
+//          ar & mspMapPoints;
+            ar & mvpBackupKeyFrames;
+            ar & mvpBackupMapPoints;
 
-        ar & mbImuInitialized;
-        ar & mbIsInertial;
-        ar & mbIMU_BA1;
-        ar & mbIMU_BA2;
-    }
+            ar & mvBackupKeyFrameOriginsId;
 
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    Map();
-    Map(int initKFid);
-    ~Map();
+            ar & mnBackupKFinitialID;
+            ar & mnBackupKFlowerID;
 
-    void AddKeyFrame(KeyFrame* pKF);
-    void AddMapPoint(MapPoint* pMP);
-    void EraseMapPoint(MapPoint* pMP);
-    void EraseKeyFrame(KeyFrame* pKF);
-    void SetReferenceMapPoints(const std::vector<MapPoint*> &vpMPs);
-    void InformNewBigChange();
-    int GetLastBigChangeIdx();
+            ar & mbImuInitialized;
+            ar & mbIsInertial;
+            ar & mbIMU_BA1;
+            ar & mbIMU_BA2;
+        }
 
-    std::vector<KeyFrame*> GetAllKeyFrames();
-    std::vector<MapPoint*> GetAllMapPoints();
-    std::vector<MapPoint*> GetReferenceMapPoints();
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    long unsigned int MapPointsInMap();
-    long unsigned  KeyFramesInMap();
+        Map();
 
-    long unsigned int GetId();
+        explicit Map(int initKFid);
 
-    long unsigned int GetInitKFid();
-    void SetInitKFid(long unsigned int initKFif);
-    long unsigned int GetMaxKFid();
+        ~Map();
 
-    KeyFrame* GetOriginKF();
+        void AddKeyFrame(KeyFrame *pKF);
 
-    void SetCurrentMap();
-    void SetStoredMap();
+        void AddMapPoint(MapPoint *pMP);
 
-    bool HasThumbnail();
-    bool IsInUse();
+        void EraseMapPoint(MapPoint *pMP);
 
-    void SetBad();
-    bool IsBad();
+        void EraseKeyFrame(KeyFrame *pKF);
 
-    void clear();
+        void SetReferenceMapPoints(const std::vector<MapPoint *> &vpMPs);
 
-    int GetMapChangeIndex();
-    void IncreaseChangeIndex();
-    int GetLastMapChange();
-    void SetLastMapChange(int currentChangeId);
+        void InformNewBigChange();
 
-    void SetImuInitialized();
-    bool isImuInitialized();
+        int GetLastBigChangeIdx();
 
-    void ApplyScaledRotation(const Sophus::SE3f &T, const float s, const bool bScaledVel=false);
+        std::vector<KeyFrame *> GetAllKeyFrames();
 
-    void SetInertialSensor();
-    bool IsInertial();
-    void SetIniertialBA1();
-    void SetIniertialBA2();
-    bool GetIniertialBA1();
-    bool GetIniertialBA2();
+        std::vector<MapPoint *> GetAllMapPoints();
 
-    void PrintEssentialGraph();
-    bool CheckEssentialGraph();
-    void ChangeId(long unsigned int nId);
+        std::vector<MapPoint *> GetReferenceMapPoints();
 
-    unsigned int GetLowerKFID();
+        long unsigned int MapPointsInMap();
 
-    void PreSave(std::set<GeometricCamera*> &spCams);
-    void PostLoad(KeyFrameDatabase* pKFDB, ORBVocabulary* pORBVoc/*, map<long unsigned int, KeyFrame*>& mpKeyFrameId*/, map<unsigned int, GeometricCamera*> &mpCams);
+        long unsigned KeyFramesInMap();
 
-    void printReprojectionError(list<KeyFrame*> &lpLocalWindowKFs, KeyFrame* mpCurrentKF, string &name, string &name_folder);
+        [[nodiscard]] long unsigned int GetId() const;
 
-    vector<KeyFrame*> mvpKeyFrameOrigins;
-    vector<unsigned long int> mvBackupKeyFrameOriginsId;
-    KeyFrame* mpFirstRegionKF;
-    std::mutex mMutexMapUpdate;
+        long unsigned int GetInitKFid();
 
-    // This avoid that two points are created simultaneously in separate threads (id conflict)
-    std::mutex mMutexPointCreation;
+        void SetInitKFid(long unsigned int initKFif);
 
-    bool mbFail;
+        long unsigned int GetMaxKFid();
 
-    // Size of the thumbnail (always in power of 2)
-    static const int THUMB_WIDTH = 512;
-    static const int THUMB_HEIGHT = 512;
+        KeyFrame *GetOriginKF();
 
-    static long unsigned int nNextId;
+        void SetCurrentMap();
 
-    // DEBUG: show KFs which are used in LBA
-    std::set<long unsigned int> msOptKFs;
-    std::set<long unsigned int> msFixedKFs;
+        void SetStoredMap();
 
-protected:
+        bool HasThumbnail() {};
 
-    long unsigned int mnId;
+        [[nodiscard]] bool IsInUse() const;
 
-    std::set<MapPoint*> mspMapPoints;
-    std::set<KeyFrame*> mspKeyFrames;
+        void SetBad();
 
-    // Save/load, the set structure is broken in libboost 1.58 for ubuntu 16.04, a vector is serializated
-    std::vector<MapPoint*> mvpBackupMapPoints;
-    std::vector<KeyFrame*> mvpBackupKeyFrames;
+        [[nodiscard]] bool IsBad() const;
 
-    KeyFrame* mpKFinitial;
-    KeyFrame* mpKFlowerID;
+        void clear();
 
-    unsigned long int mnBackupKFinitialID;
-    unsigned long int mnBackupKFlowerID;
+        int GetMapChangeIndex();
 
-    std::vector<MapPoint*> mvpReferenceMapPoints;
+        void IncreaseChangeIndex();
 
-    bool mbImuInitialized;
+        int GetLastMapChange();
 
-    int mnMapChange;
-    int mnMapChangeNotified;
+        void SetLastMapChange(int currentChangeId);
 
-    long unsigned int mnInitKFid;
-    long unsigned int mnMaxKFid;
-    //long unsigned int mnLastLoopKFid;
+        void SetImuInitialized();
 
-    // Index related to a big change in the map (loop closure, global BA)
-    int mnBigChangeIdx;
+        bool isImuInitialized();
+
+        void ApplyScaledRotation(const Sophus::SE3f &T, float s, bool bScaledVel = false);
+
+        void SetInertialSensor();
+
+        bool IsInertial();
+
+        void SetInertialBA1();
+
+        void SetInertialBA2();
+
+        bool GetInertialBA1();
+
+        bool GetInertialBA2();
+
+        void PrintEssentialGraph() {};
+
+        bool CheckEssentialGraph() {};
+
+        void ChangeId(long unsigned int nId);
+
+        unsigned int GetLowerKFID();
+
+        void PreSave(std::set<GeometricCamera *> &spCams);
+
+        void PostLoad(KeyFrameDatabase *pKFDB, ORBVocabulary *pORBVoc/*, map<long unsigned int, KeyFrame*>& mpKeyFrameId*/, map<unsigned int, GeometricCamera *> &mpCams);
+
+        [[maybe_unused]] void printReprojectionError(list<KeyFrame *> &lpLocalWindowKFs, KeyFrame *mpCurrentKF, string &name, string &name_folder) {};
+
+        vector<KeyFrame *> mvpKeyFrameOrigins;
+        vector<unsigned long int> mvBackupKeyFrameOriginsId;
+        KeyFrame *mpFirstRegionKF;
+        std::mutex mMutexMapUpdate;
+
+//      This avoids that two points are created simultaneously in separate threads (id conflict)
+        std::mutex mMutexPointCreation;
+
+        bool mbFail;
+
+//      Size of the thumbnail (always in power of 2)
+        static const int THUMB_WIDTH = 512;
+        static const int THUMB_HEIGHT = 512;
+
+        static long unsigned int nNextId;
+
+//      DEBUG: show KFs which are used in LBA
+        std::set<long unsigned int> msOptKFs;
+        std::set<long unsigned int> msFixedKFs;
+
+    protected:
+        long unsigned int mnId;
+
+        std::set<MapPoint *> mspMapPoints;
+        std::set<KeyFrame *> mspKeyFrames;
+
+//      Save/load, the set structure is broken in libboost 1.58 for ubuntu 16.04, a vector is serializated
+        std::vector<MapPoint *> mvpBackupMapPoints;
+        std::vector<KeyFrame *> mvpBackupKeyFrames;
+
+        KeyFrame *mpKFinitial{};
+        KeyFrame *mpKFlowerID{};
+
+        unsigned long int mnBackupKFinitialID{};
+        unsigned long int mnBackupKFlowerID{};
+
+        std::vector<MapPoint *> mvpReferenceMapPoints;
+
+        bool mbImuInitialized;
+
+        int mnMapChange;
+        int mnMapChangeNotified;
+
+        long unsigned int mnInitKFid{};
+        long unsigned int mnMaxKFid;
+//      long unsigned int mnLastLoopKFid;
+
+//      Index related to a big change in the map (loop closure, global BA)
+        int mnBigChangeIdx;
 
 
-    // View of the map in aerial sight (for the AtlasViewer)
-    GLubyte* mThumbnail;
+//      View of the map in aerial sight (for the AtlasViewer)
+        GLubyte *mThumbnail;
 
-    bool mIsInUse;
-    bool mHasTumbnail;
-    bool mbBad = false;
+        bool mIsInUse;
+        bool mHasTumbnail;
+        bool mbBad = false;
 
-    bool mbIsInertial;
-    bool mbIMU_BA1;
-    bool mbIMU_BA2;
+        bool mbIsInertial;
+        bool mbIMU_BA1;
+        bool mbIMU_BA2;
 
-    // Mutex
-    std::mutex mMutexMap;
+//      Mutex
+        std::mutex mMutexMap;
+    };
+}  // namespace ORB_SLAM3
 
-};
-
-} //namespace ORB_SLAM3
-
-#endif // MAP_H
+#endif  // MAP_H

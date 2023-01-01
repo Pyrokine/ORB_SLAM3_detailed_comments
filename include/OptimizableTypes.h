@@ -26,214 +26,203 @@
 #include <Eigen/Geometry>
 #include <include/CameraModels/GeometricCamera.h>
 
-namespace ORB_SLAM3
-{
-// 左目纯位姿优化的边，左目点的重投影误差相对于左目位姿
-class EdgeSE3ProjectXYZOnlyPose : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, g2o::VertexSE3Expmap>
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+namespace ORB_SLAM3 {
+//  左目纯位姿优化的边，左目点的重投影误差相对于左目位姿
+    class EdgeSE3ProjectXYZOnlyPose : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, g2o::VertexSE3Expmap> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgeSE3ProjectXYZOnlyPose() {}
+        EdgeSE3ProjectXYZOnlyPose() = default;
 
-    bool read(std::istream &is);
+        bool read(std::istream &is) override;
 
-    bool write(std::ostream &os) const;
+        bool write(std::ostream &os) const override;
 
-    void computeError()
-    {
-        const g2o::VertexSE3Expmap *v1 = static_cast<const g2o::VertexSE3Expmap *>(_vertices[0]);
-        Eigen::Vector2d obs(_measurement);
-        _error = obs - pCamera->project(v1->estimate().map(Xw));
-    }
+        void computeError() override {
+            const auto *v1 = dynamic_cast<const g2o::VertexSE3Expmap *>(_vertices[0]);
+            Eigen::Vector2d obs(_measurement);
+            _error = obs - pCamera->project(v1->estimate().map(Xw));
+        }
 
-    bool isDepthPositive()
-    {
-        const g2o::VertexSE3Expmap *v1 = static_cast<const g2o::VertexSE3Expmap *>(_vertices[0]);
-        return (v1->estimate().map(Xw))(2) > 0.0;
-    }
+        [[maybe_unused]] bool isDepthPositive() {
+            const auto *v1 = dynamic_cast<const g2o::VertexSE3Expmap *>(_vertices[0]);
+            return (v1->estimate().map(Xw))(2) > 0.0;
+        }
 
-    virtual void linearizeOplus();
+        void linearizeOplus() override;
 
-    Eigen::Vector3d Xw;
-    GeometricCamera *pCamera;
-};
+        Eigen::Vector3d Xw;
+        GeometricCamera *pCamera{};
+    };
 
-// 两个相机中的右目上的重投影误差与左目位姿的边
-class EdgeSE3ProjectXYZOnlyPoseToBody : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, g2o::VertexSE3Expmap>
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+//  两个相机中的右目上的重投影误差与左目位姿的边
+    class EdgeSE3ProjectXYZOnlyPoseToBody : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, g2o::VertexSE3Expmap> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgeSE3ProjectXYZOnlyPoseToBody() {}
+        EdgeSE3ProjectXYZOnlyPoseToBody() = default;
 
-    bool read(std::istream &is);
+        bool read(std::istream &is) override;
 
-    bool write(std::ostream &os) const;
+        bool write(std::ostream &os) const override;
 
-    void computeError()
-    {
-        const g2o::VertexSE3Expmap *v1 = static_cast<const g2o::VertexSE3Expmap *>(_vertices[0]);
-        Eigen::Vector2d obs(_measurement);
-        _error = obs - pCamera->project((mTrl * v1->estimate()).map(Xw));
-    }
+        void computeError() override {
+            const auto *v1 = dynamic_cast<const g2o::VertexSE3Expmap *>(_vertices[0]);
+            Eigen::Vector2d obs(_measurement);
+            _error = obs - pCamera->project((mTrl * v1->estimate()).map(Xw));
+        }
 
-    bool isDepthPositive()
-    {
-        const g2o::VertexSE3Expmap *v1 = static_cast<const g2o::VertexSE3Expmap *>(_vertices[0]);
-        return ((mTrl * v1->estimate()).map(Xw))(2) > 0.0;
-    }
+        [[maybe_unused]] bool isDepthPositive() {
+            const auto *v1 = dynamic_cast<const g2o::VertexSE3Expmap *>(_vertices[0]);
+            return ((mTrl * v1->estimate()).map(Xw))(2) > 0.0;
+        }
 
-    virtual void linearizeOplus();
+        void linearizeOplus() override;
 
-    Eigen::Vector3d Xw;
-    GeometricCamera *pCamera;
+        Eigen::Vector3d Xw;
+        GeometricCamera *pCamera{};
 
-    g2o::SE3Quat mTrl;
-};
+        g2o::SE3Quat mTrl;
+    };
 
 
-// 左目纯位姿优化的边，左目点的重投影误差相对于左目位姿以及三维点
-class EdgeSE3ProjectXYZ : public g2o::BaseBinaryEdge<2, Eigen::Vector2d, g2o::VertexSBAPointXYZ, g2o::VertexSE3Expmap>
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+//  左目纯位姿优化的边，左目点的重投影误差相对于左目位姿以及三维点
+    class EdgeSE3ProjectXYZ : public g2o::BaseBinaryEdge<2, Eigen::Vector2d, g2o::VertexSBAPointXYZ, g2o::VertexSE3Expmap> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgeSE3ProjectXYZ();
+        EdgeSE3ProjectXYZ();
 
-    bool read(std::istream &is);
+        bool read(std::istream &is) override;
 
-    bool write(std::ostream &os) const;
+        bool write(std::ostream &os) const override;
 
-    void computeError()
-    {
-        const g2o::VertexSE3Expmap *v1 = static_cast<const g2o::VertexSE3Expmap *>(_vertices[1]);
-        const g2o::VertexSBAPointXYZ *v2 = static_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
-        Eigen::Vector2d obs(_measurement);
-        _error = obs - pCamera->project(v1->estimate().map(v2->estimate()));
-    }
+        void computeError() override {
+            const auto *v1 = dynamic_cast<const g2o::VertexSE3Expmap *>(_vertices[1]);
+            const auto *v2 = dynamic_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
+            Eigen::Vector2d obs(_measurement);
+            _error = obs - pCamera->project(v1->estimate().map(v2->estimate()));
+        }
 
-    bool isDepthPositive()
-    {
-        const g2o::VertexSE3Expmap *v1 = static_cast<const g2o::VertexSE3Expmap *>(_vertices[1]);
-        const g2o::VertexSBAPointXYZ *v2 = static_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
-        return ((v1->estimate().map(v2->estimate()))(2) > 0.0);
-    }
+        bool isDepthPositive() {
+            const auto *v1 = dynamic_cast<const g2o::VertexSE3Expmap *>(_vertices[1]);
+            const auto *v2 = dynamic_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
+            return ((v1->estimate().map(v2->estimate()))(2) > 0.0);
+        }
 
-    virtual void linearizeOplus();
+        void linearizeOplus() override;
 
-    GeometricCamera *pCamera;
-};
+        GeometricCamera *pCamera{};
+    };
 
-// 两个相机中的右目上的重投影误差与左目位姿以及三维点的边
-class EdgeSE3ProjectXYZToBody : public g2o::BaseBinaryEdge<2, Eigen::Vector2d, g2o::VertexSBAPointXYZ, g2o::VertexSE3Expmap>
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+//  两个相机中的右目上的重投影误差与左目位姿以及三维点的边
+    class EdgeSE3ProjectXYZToBody : public g2o::BaseBinaryEdge<2, Eigen::Vector2d, g2o::VertexSBAPointXYZ, g2o::VertexSE3Expmap> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    EdgeSE3ProjectXYZToBody();
+        EdgeSE3ProjectXYZToBody();
 
-    bool read(std::istream &is);
+        bool read(std::istream &is) override;
 
-    bool write(std::ostream &os) const;
+        bool write(std::ostream &os) const override;
 
-    void computeError()
-    {
-        const g2o::VertexSE3Expmap *v1 = static_cast<const g2o::VertexSE3Expmap *>(_vertices[1]);
-        const g2o::VertexSBAPointXYZ *v2 = static_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
-        Eigen::Vector2d obs(_measurement);
-        _error = obs - pCamera->project((mTrl * v1->estimate()).map(v2->estimate()));
-    }
+        void computeError() override {
+            const auto *v1 = dynamic_cast<const g2o::VertexSE3Expmap *>(_vertices[1]);
+            const auto *v2 = dynamic_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
+            Eigen::Vector2d obs(_measurement);
+            _error = obs - pCamera->project((mTrl * v1->estimate()).map(v2->estimate()));
+        }
 
-    bool isDepthPositive()
-    {
-        const g2o::VertexSE3Expmap *v1 = static_cast<const g2o::VertexSE3Expmap *>(_vertices[1]);
-        const g2o::VertexSBAPointXYZ *v2 = static_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
-        return ((mTrl * v1->estimate()).map(v2->estimate()))(2) > 0.0;
-    }
+        bool isDepthPositive() {
+            const auto *v1 = dynamic_cast<const g2o::VertexSE3Expmap *>(_vertices[1]);
+            const auto *v2 = dynamic_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
+            return ((mTrl * v1->estimate()).map(v2->estimate()))(2) > 0.0;
+        }
 
-    virtual void linearizeOplus();
+        void linearizeOplus() override;
 
-    GeometricCamera *pCamera;
-    g2o::SE3Quat mTrl;
-};
+        GeometricCamera *pCamera{};
+        g2o::SE3Quat mTrl;
+    };
 
-// sim3节点
-class VertexSim3Expmap : public g2o::BaseVertex<7, g2o::Sim3>
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    VertexSim3Expmap();
-    virtual bool read(std::istream &is);
-    virtual bool write(std::ostream &os) const;
+//  sim3节点
+    class VertexSim3Expmap : public g2o::BaseVertex<7, g2o::Sim3> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    // 原始值
-    virtual void setToOriginImpl()
-    {
-        _estimate = g2o::Sim3();
-    }
+        VertexSim3Expmap();
 
-    // 更新
-    virtual void oplusImpl(const double *update_)
-    {
-        Eigen::Map<g2o::Vector7d> update(const_cast<double *>(update_));
+        bool read(std::istream &is) override;
 
-        if (_fix_scale)
-            update[6] = 0;
+        bool write(std::ostream &os) const override;
 
-        g2o::Sim3 s(update);
-        setEstimate(s * estimate());
-    }
+//      原始值
+        void setToOriginImpl() override {
+            _estimate = g2o::Sim3();
+        }
 
-    GeometricCamera *pCamera1, *pCamera2;
+//        更新
+        void oplusImpl(const double *update_) override {
+            Eigen::Map<g2o::Vector7d> update(const_cast<double *>(update_));
 
-    bool _fix_scale;
-};
+            if (_fix_scale)
+                update[6] = 0;
 
-// sim3边
-class EdgeSim3ProjectXYZ : public g2o::BaseBinaryEdge<2, Eigen::Vector2d, g2o::VertexSBAPointXYZ, ORB_SLAM3::VertexSim3Expmap>
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    EdgeSim3ProjectXYZ();
-    virtual bool read(std::istream &is);
-    virtual bool write(std::ostream &os) const;
+            g2o::Sim3 s(update);
+            setEstimate(s * estimate());
+        }
 
-    void computeError()
-    {
-        const ORB_SLAM3::VertexSim3Expmap *v1 = static_cast<const ORB_SLAM3::VertexSim3Expmap *>(_vertices[1]);
-        const g2o::VertexSBAPointXYZ *v2 = static_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
+        GeometricCamera *pCamera1{}, *pCamera2{};
 
-        Eigen::Vector2d obs(_measurement);
-        _error = obs - v1->pCamera1->project(v1->estimate().map(v2->estimate()));
-    }
+        bool _fix_scale;
+    };
 
-    // 自动求导，没错g2o也有自动求导
-    // virtual void linearizeOplus();
-};
+//  sim3边
+    class EdgeSim3ProjectXYZ : public g2o::BaseBinaryEdge<2, Eigen::Vector2d, g2o::VertexSBAPointXYZ, ORB_SLAM3::VertexSim3Expmap> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-// sim3反投的边
-class EdgeInverseSim3ProjectXYZ : public g2o::BaseBinaryEdge<2, Eigen::Vector2d, g2o::VertexSBAPointXYZ, VertexSim3Expmap>
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    EdgeInverseSim3ProjectXYZ();
-    virtual bool read(std::istream &is);
-    virtual bool write(std::ostream &os) const;
+        EdgeSim3ProjectXYZ();
 
-    void computeError()
-    {
-        const ORB_SLAM3::VertexSim3Expmap *v1 = static_cast<const ORB_SLAM3::VertexSim3Expmap *>(_vertices[1]);
-        const g2o::VertexSBAPointXYZ *v2 = static_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
+        bool read(std::istream &is) override;
 
-        Eigen::Vector2d obs(_measurement);
-        _error = obs - v1->pCamera2->project((v1->estimate().inverse().map(v2->estimate())));
-    }
+        bool write(std::ostream &os) const override;
 
-    // 自动求导，没错g2o也有自动求导
-    // virtual void linearizeOplus();
-};
+        void computeError() override {
+            const auto *v1 = dynamic_cast<const ORB_SLAM3::VertexSim3Expmap *>(_vertices[1]);
+            const auto *v2 = dynamic_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
+
+            Eigen::Vector2d obs(_measurement);
+            _error = obs - v1->pCamera1->project(v1->estimate().map(v2->estimate()));
+        }
+
+//      自动求导，没错g2o也有自动求导
+//      virtual void linearizeOplus();
+    };
+
+//  sim3反投的边
+    class EdgeInverseSim3ProjectXYZ : public g2o::BaseBinaryEdge<2, Eigen::Vector2d, g2o::VertexSBAPointXYZ, VertexSim3Expmap> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+        EdgeInverseSim3ProjectXYZ();
+
+        bool read(std::istream &is) override;
+
+        bool write(std::ostream &os) const override;
+
+        void computeError() override {
+            const auto *v1 = dynamic_cast<const ORB_SLAM3::VertexSim3Expmap *>(_vertices[1]);
+            const auto *v2 = dynamic_cast<const g2o::VertexSBAPointXYZ *>(_vertices[0]);
+
+            Eigen::Vector2d obs(_measurement);
+            _error = obs - v1->pCamera2->project((v1->estimate().inverse().map(v2->estimate())));
+        }
+
+//      自动求导，没错g2o也有自动求导
+//      virtual void linearizeOplus();
+    };
 
 }
 
-#endif // ORB_SLAM3_OPTIMIZABLETYPES_H
+#endif  // ORB_SLAM3_OPTIMIZABLETYPES_H

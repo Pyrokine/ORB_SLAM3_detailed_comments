@@ -31,178 +31,202 @@
 #include <mutex>
 
 
-namespace ORB_SLAM3
-{
+namespace ORB_SLAM3 {
 
-class System;
-class Tracking;
-class LoopClosing;
-class Atlas;
-class PointCloudMapping;
+    class System;
 
-class LocalMapping
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    LocalMapping(System* pSys, Atlas* pAtlas, const float bMonocular, bool bInertial, const string &_strSeqName=std::string());
+    class Tracking;
 
-    void SetLoopCloser(LoopClosing* pLoopCloser);
+    class LoopClosing;
 
-    void SetTracker(Tracking* pTracker);
-    void SetPointCloudMapper(PointCloudMapping* pPointCloudMapping)
-    {
-        mpPointCloudMapping = pPointCloudMapping;
-    }
-    // Main function
-    void Run();
+    class Atlas;
 
-    void InsertKeyFrame(KeyFrame* pKF);
-    void EmptyQueue();
+    class PointCloudMapping;
 
-    // Thread Synch
-    void RequestStop();
-    void RequestReset();
-    void RequestResetActiveMap(Map* pMap);
-    bool Stop();
-    void Release();
-    bool isStopped();
-    bool stopRequested();
-    bool AcceptKeyFrames();
-    void SetAcceptKeyFrames(bool flag);
-    bool SetNotStop(bool flag);
+    class LocalMapping {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    void InterruptBA();
+        LocalMapping(System *pSys, Atlas *pAtlas, bool bMonocular, bool bInertial, const string &_strSeqName = std::string());
 
-    void RequestFinish();
-    bool isFinished();
+        void SetLoopCloser(LoopClosing *pLoopCloser);
 
-    int KeyframesInQueue(){
-        unique_lock<std::mutex> lock(mMutexNewKFs);
-        return mlNewKeyFrames.size();
-    }
+        void SetTracker(Tracking *pTracker);
 
-    bool IsInitializing();
-    double GetCurrKFTime();
-    KeyFrame* GetCurrKF();
+        void SetPointCloudMapper(PointCloudMapping *pPointCloudMapping) {
+            mpPointCloudMapping = pPointCloudMapping;
+        }
 
-    std::mutex mMutexImuInit;
+//      Main function
+        void Run();
 
-    Eigen::MatrixXd mcovInertial;
-    Eigen::Matrix3d mRwg;
-    Eigen::Vector3d mbg;
-    Eigen::Vector3d mba;
-    double mScale;
-    double mInitTime;
-    double mCostTime;
+        void InsertKeyFrame(KeyFrame *pKF);
 
-    unsigned int mInitSect;
-    unsigned int mIdxInit;
-    unsigned int mnKFs;
-    double mFirstTs;
-    int mnMatchesInliers;
+        void EmptyQueue();
 
-    // For debugging (erase in normal mode)
-    int mInitFr;
-    int mIdxIteration;
-    string strSequence;
+//      Thread Sync
+        void RequestStop();
 
-    bool mbNotBA1;
-    bool mbNotBA2;
-    bool mbBadImu;
+        void RequestReset();
 
-    bool mbWriteStats;
+        void RequestResetActiveMap(Map *pMap);
 
-    // not consider far points (clouds)
-    bool mbFarPoints;
-    float mThFarPoints;
+        bool Stop();
+
+        void Release();
+
+        bool isStopped();
+
+        bool stopRequested();
+
+        bool AcceptKeyFrames();
+
+        void SetAcceptKeyFrames(bool flag);
+
+        bool SetNotStop(bool flag);
+
+        void InterruptBA();
+
+        void RequestFinish();
+
+        bool isFinished();
+
+        int KeyframesInQueue() {
+            unique_lock<std::mutex> lock(mMutexNewKFs);
+            return int(mlNewKeyFrames.size());
+        }
+
+        bool IsInitializing() const;
+
+        double GetCurrKFTime();
+
+        KeyFrame *GetCurrKF();
+
+        std::mutex mMutexImuInit;
+
+        Eigen::MatrixXd mCovInertial;
+        Eigen::Matrix3d mRwg;
+        Eigen::Vector3d mbg;
+        Eigen::Vector3d mba;
+        double mScale;
+        double mInitTime{};
+        double mCostTime{};
+
+        unsigned int mInitSect;
+        unsigned int mIdxInit;
+        unsigned int mnKFs{};
+        double mFirstTs{};
+        int mnMatchesInners;
+
+//      For debugging (erase in normal mode)
+        int mInitFr{};
+        int mIdxIteration;
+        string strSequence;
+
+        bool mbNotBA1;
+        bool mbNotBA2;
+        bool mbBadImu;
+
+        bool mbWriteStats{};
+
+//      not consider far points (clouds)
+        bool mbFarPoints{};
+        float mThFarPoints{};
 
 #ifdef REGISTER_TIMES
-    vector<double> vdKFInsert_ms;
-    vector<double> vdMPCulling_ms;
-    vector<double> vdMPCreation_ms;
-    vector<double> vdLBA_ms;
-    vector<double> vdKFCulling_ms;
-    vector<double> vdLMTotal_ms;
+        vector<double> vdKFInsert_ms;
+        vector<double> vdMPCulling_ms;
+        vector<double> vdMPCreation_ms;
+        vector<double> vdLBA_ms;
+        vector<double> vdKFCulling_ms;
+        vector<double> vdLMTotal_ms;
 
 
-    vector<double> vdLBASync_ms;
-    vector<double> vdKFCullingSync_ms;
-    vector<int> vnLBA_edges;
-    vector<int> vnLBA_KFopt;
-    vector<int> vnLBA_KFfixed;
-    vector<int> vnLBA_MPs;
-    int nLBA_exec;
-    int nLBA_abort;
+        vector<double> vdLBASync_ms;
+        vector<double> vdKFCullingSync_ms;
+        vector<int> vnLBA_edges;
+        vector<int> vnLBA_KFopt;
+        vector<int> vnLBA_KFfixed;
+        vector<int> vnLBA_MPs;
+        int nLBA_exec;
+        int nLBA_abort;
 #endif
-protected:
+    protected:
 
-    bool CheckNewKeyFrames();
-    void ProcessNewKeyFrame();
-    void CreateNewMapPoints();
+        bool CheckNewKeyFrames();
 
-    void MapPointCulling();
-    void SearchInNeighbors();
-    void KeyFrameCulling();
+        void ProcessNewKeyFrame();
 
-    System *mpSystem;
+        void CreateNewMapPoints();
 
-    bool mbMonocular;
-    bool mbInertial;
+        void MapPointCulling();
 
-    void ResetIfRequested();
-    bool mbResetRequested;
-    bool mbResetRequestedActiveMap;
-    Map* mpMapToReset;
-    std::mutex mMutexReset;
+        void SearchInNeighbors();
 
-    bool CheckFinish();
-    void SetFinish();
-    bool mbFinishRequested;
-    bool mbFinished;
-    std::mutex mMutexFinish;
+        void KeyFrameCulling();
 
-    Atlas* mpAtlas;
+        System *mpSystem;
 
-    LoopClosing* mpLoopCloser;
-    Tracking* mpTracker;
-    PointCloudMapping* mpPointCloudMapping;
+        bool mbMonocular;
+        bool mbInertial;
 
-    std::list<KeyFrame*> mlNewKeyFrames, mlNewKeyFrameForDenseMap;
+        void ResetIfRequested();
 
-    KeyFrame* mpCurrentKeyFrame;
+        bool mbResetRequested;
+        bool mbResetRequestedActiveMap;
+        Map *mpMapToReset{};
+        std::mutex mMutexReset;
 
-    std::list<MapPoint*> mlpRecentAddedMapPoints;
+        bool CheckFinish();
 
-    std::mutex mMutexNewKFs;
+        void SetFinish();
 
-    bool mbAbortBA;
+        bool mbFinishRequested;
+        bool mbFinished;
+        std::mutex mMutexFinish;
 
-    bool mbStopped;
-    bool mbStopRequested;
-    bool mbNotStop;
-    std::mutex mMutexStop;
+        Atlas *mpAtlas;
 
-    bool mbAcceptKeyFrames;
-    std::mutex mMutexAccept;
+        LoopClosing *mpLoopCloser{};
+        Tracking *mpTracker{};
+        PointCloudMapping *mpPointCloudMapping{};
 
-    void InitializeIMU(float priorG = 1e2, float priorA = 1e6, bool bFirst = false);
-    void ScaleRefinement();
+        std::list<KeyFrame *> mlNewKeyFrames, mlNewKeyFrameForDenseMap;
 
-    bool bInitializing;
+        KeyFrame *mpCurrentKeyFrame{};
 
-    Eigen::MatrixXd infoInertial;
-    int mNumLM;
-    int mNumKFCulling;
+        std::list<MapPoint *> mlpRecentAddedMapPoints;
 
-    float mTinit;
+        std::mutex mMutexNewKFs;
 
-    int countRefinement;
+        bool mbAbortBA;
 
-    //DEBUG
-    ofstream f_lm;
+        bool mbStopped;
+        bool mbStopRequested;
+        bool mbNotStop;
+        std::mutex mMutexStop;
 
+        bool mbAcceptKeyFrames;
+        std::mutex mMutexAccept;
+
+        void InitializeIMU(float priorG = 1e2, float priorA = 1e6, bool bFirst = false);
+
+        void ScaleRefinement();
+
+        bool bInitializing;
+
+        Eigen::MatrixXd infoInertial;
+        int mNumLM;
+        int mNumKFCulling;
+
+        float mTInit;
+
+        int countRefinement{};
+
+//      DEBUG
+        ofstream f_lm;
     };
 
-} //namespace ORB_SLAM
+}  // namespace ORB_SLAM
 
-#endif // LOCALMAPPING_H
+#endif  // LOCALMAPPING_H

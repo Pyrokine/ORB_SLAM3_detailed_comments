@@ -1,28 +1,28 @@
-// g2o - General Graph Optimization
-// Copyright (C) 2011 R. Kuemmerle, G. Grisetti, W. Burgard
-// All rights reserved.
+//g2o - General Graph Optimization
+//Copyright (C) 2011 R. Kuemmerle, G. Grisetti, W. Burgard
+//All rights reserved.
 //
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
+//Redistribution and use in source and binary forms, with or without
+//modification, are permitted provided that the following conditions are
+//met:
 //
-// * Redistributions of source code must retain the above copyright notice,
-//   this list of conditions and the following disclaimer.
-// * Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the
-//   documentation and/or other materials provided with the distribution.
+//* Redistributions of source code must retain the above copyright notice,
+//this list of conditions and the following disclaimer.
+//* Redistributions in binary form must reproduce the above copyright
+//notice, this list of conditions and the following disclaimer in the
+//documentation and/or other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
-// IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-// TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-// PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-// TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+//TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+//PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+//TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef G2O_MACROS_H
 #define G2O_MACROS_H
@@ -35,7 +35,7 @@
 #define RAD2DEG(x) ((x) * 57.29577951308232087721)
 #endif
 
-// GCC the one and only
+//GCC the one and only
 #if defined(__GNUC__)
 #  define G2O_ATTRIBUTE_CONSTRUCTOR(func) \
      static void func(void)__attribute__ ((constructor)); \
@@ -57,19 +57,19 @@
 # define g2o_isfinite(x)  std::isfinite(x)
 #endif
 
-// MSVC on Windows
+//MSVC on Windows
 #elif defined _MSC_VER
 #  define __PRETTY_FUNCTION__ __FUNCTION__
 
 /**
 Modified by Mark Pupilli from:
 
-	"Initializer/finalizer sample for MSVC and GCC.
+    "Initializer/finalizer sample for MSVC and GCC.
     2010 Joe Lowe. Released into the public domain."
 
-	"For MSVC, places a ptr to the function in the user initializer section (.CRT$XCU), basically the same thing the compiler does for the constructor calls for static C++ objects. For GCC, uses a constructor attribute."
+    "For MSVC, places a ptr to the function in the user initializer section (.CRT$XCU), basically the same thing the compiler does for the constructor calls for static C++ objects. For GCC, uses a constructor attribute."
 
-	(As posted on Stack OVerflow)
+    (As posted on Stack OVerflow)
 */
 #  define G2O_ATTRIBUTE_CONSTRUCTOR(f) \
      __pragma(section(".CRT$XCU",read)) \
@@ -89,7 +89,7 @@ Modified by Mark Pupilli from:
 # define g2o_isinf(x)    (_finite(x) == 0)
 # define g2o_isfinite(x) (_finite(x) != 0)
 
-// unknown compiler
+//unknown compiler
 #else
 #  ifndef __PRETTY_FUNCTION__
 #    define __PRETTY_FUNCTION__ ""
@@ -108,14 +108,14 @@ Modified by Mark Pupilli from:
 
 #endif
 
-// some macros that are only useful for c++
+//some macros that are only useful for c++
 #ifdef __cplusplus
 
 #define G2O_FSKIP_LINE(f) \
    {char c=' ';while(c != '\n' && f.good() && !(f).eof()) (f).get(c);}
 
 #ifndef PVAR
-  #define PVAR(s) \
+#define PVAR(s) \
     #s << " = " << (s) << std::flush
 #endif
 
@@ -129,6 +129,6 @@ Modified by Mark Pupilli from:
   std::fixed << s << std::resetiosflags(std::ios_base::fixed)
 #endif
 
-#endif // __cplusplus
+#endif// __cplusplus
 
 #endif

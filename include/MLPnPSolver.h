@@ -52,26 +52,26 @@
 #include "MapPoint.h"
 #include "Frame.h"
 
-#include<Eigen/Dense>
-#include<Eigen/Sparse>
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
 
-namespace ORB_SLAM3{
-    class MLPnPsolver {
+namespace ORB_SLAM3 {
+    class MLPnPSolver {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-        MLPnPsolver(const Frame &F, const vector<MapPoint*> &vpMapPointMatches);
+        MLPnPSolver(const Frame &F, const vector<MapPoint *> &vpMapPointMatches);
 
-        ~MLPnPsolver();
+        ~MLPnPSolver() = default;
 
-        void SetRansacParameters(double probability = 0.99, int minInliers = 8, int maxIterations = 300, int minSet = 6, float epsilon = 0.4,
+        void SetRansacParameters(double probability = 0.99, int minInners = 8, int maxIterations = 300, int minSet = 6, float epsilon = 0.4,
                                  float th2 = 5.991);
 
-        //Find metod is necessary?
+//      Find method is necessary?
 
-        bool iterate(int nIterations, bool &bNoMore, vector<bool> &vbInliers, int &nInliers, Eigen::Matrix4f &Tout);
+        bool iterate(int nIterations, bool &bNoMore, vector<bool> &vbInners, int &nInners, Eigen::Matrix4f &Tout);
 
-        //Type definitions needed by the original code
+//      Type definitions needed by the original code
 
         /** A 3-vector of unit length used to describe landmark observations/bearings
          *  in camera frames (always expressed in camera frames)
@@ -79,7 +79,7 @@ namespace ORB_SLAM3{
         typedef Eigen::Vector3d bearingVector_t;
 
         /** An array of bearing-vectors */
-        typedef std::vector<bearingVector_t, Eigen::aligned_allocator<bearingVector_t> >
+        typedef std::vector<bearingVector_t, Eigen::aligned_allocator<bearingVector_t>>
                 bearingVectors_t;
 
         /** A 2-matrix containing the 2D covariance information of a bearing vector
@@ -90,7 +90,7 @@ namespace ORB_SLAM3{
         typedef Eigen::Matrix3d cov3_mat_t;
 
         /** An array of 3D covariance matrices */
-        typedef std::vector<cov3_mat_t, Eigen::aligned_allocator<cov3_mat_t> >
+        typedef std::vector<cov3_mat_t, Eigen::aligned_allocator<cov3_mat_t>>
                 cov3_mats_t;
 
         /** A 3-vector describing a point in 3D-space */
@@ -117,54 +117,53 @@ namespace ORB_SLAM3{
          *  translation \f$ \mathbf{t} \f$ as follows:
          *  \f$ \left( \begin{array}{cc} \mathbf{R} & \mathbf{t} \end{array} \right) \f$
          */
-        typedef Eigen::Matrix<double,3,4> transformation_t;
+        typedef Eigen::Matrix<double, 3, 4> transformation_t;
 
         /** A 3-vector describing a translation/camera position */
         typedef Eigen::Vector3d translation_t;
 
-
-
     private:
-        void CheckInliers();
+        void CheckInners();
+
         bool Refine();
 
-        //Functions from de original MLPnP code
+//      Functions from de original MLPnP code
 
-        /*
+        /**
          * Computes the camera pose given 3D points coordinates (in the camera reference
          * system), the camera rays and (optionally) the covariance matrix of those camera rays.
          * Result is stored in solution
          */
-        void computePose(
-                const bearingVectors_t & f,
-                const points_t & p,
-                const cov3_mats_t & covMats,
-                const std::vector<int>& indices,
-                transformation_t & result);
+        static void computePose(
+                const bearingVectors_t &f,
+                const points_t &p,
+                const cov3_mats_t &covMats,
+                const std::vector<int> &indices,
+                transformation_t &result);
 
-        void mlpnp_gn(Eigen::VectorXd& x,
-                      const points_t& pts,
-                      const std::vector<Eigen::MatrixXd>& nullspaces,
-                      const Eigen::SparseMatrix<double> Kll,
+        static void mlPnP_gn(Eigen::VectorXd &x,
+                      const points_t &pts,
+                      const std::vector<Eigen::MatrixXd> &nullSpaces,
+                      const Eigen::SparseMatrix<double>& Kll,
                       bool use_cov);
 
-        void mlpnp_residuals_and_jacs(
-                const Eigen::VectorXd& x,
-                const points_t& pts,
-                const std::vector<Eigen::MatrixXd>& nullspaces,
-                Eigen::VectorXd& r,
-                Eigen::MatrixXd& fjac,
+        static void mlPnP_residuals_and_jacs(
+                const Eigen::VectorXd &x,
+                const points_t &pts,
+                const std::vector<Eigen::MatrixXd> &nullSpaces,
+                Eigen::VectorXd &r,
+                Eigen::MatrixXd &fjac,
                 bool getJacs);
 
-        void mlpnpJacs(
-            const point_t& pt,
-            const Eigen::Vector3d& nullspace_r,
-            const Eigen::Vector3d& nullspace_s,
-            const rodrigues_t& w,
-            const translation_t& t,
-            Eigen::MatrixXd& jacs);
+        static void mlPnPJacs(
+                const point_t &pt,
+                const Eigen::Vector3d &nullSpace_r,
+                const Eigen::Vector3d &nullSpace_s,
+                const rodrigues_t &w,
+                const translation_t &t,
+                Eigen::MatrixXd &jacs);
 
-        //Auxiliar methods
+//      Auxiliary methods
 
         /**
         * \brief Compute a rotation matrix from Rodrigues axis angle.
@@ -172,7 +171,7 @@ namespace ORB_SLAM3{
         * \param[in] omega The Rodrigues-parameters of a rotation.
         * \return The 3x3 rotation matrix.
         */
-        Eigen::Matrix3d rodrigues2rot(const Eigen::Vector3d & omega);
+        static Eigen::Matrix3d rodrigues2rot(const Eigen::Vector3d &omega);
 
         /**
         * \brief Compute the Rodrigues-parameters of a rotation matrix.
@@ -180,78 +179,74 @@ namespace ORB_SLAM3{
         * \param[in] R The 3x3 rotation matrix.
         * \return The Rodrigues-parameters.
         */
-        Eigen::Vector3d rot2rodrigues(const Eigen::Matrix3d & R);
+        static Eigen::Vector3d rot2rodrigues(const Eigen::Matrix3d &R);
 
-        //----------------------------------------------------
-        //Fields of the solver
-        //----------------------------------------------------
-        vector<MapPoint*> mvpMapPointMatches;
+//      ----------------------------------------------------
+//      Fields of the solver
+//      ----------------------------------------------------
+        vector<MapPoint *> mvpMapPointMatches;
 
-        // 2D Points
+//      2D Points
         vector<cv::Point2f> mvP2D;
-        //Substitued by bearing vectors
+//      Substituted by bearing vectors
         bearingVectors_t mvBearingVecs;
 
         vector<float> mvSigma2;
 
-        // 3D Points
-        //vector<cv::Point3f> mvP3Dw;
+//      3D Points
+//      vector<cv::Point3f> mvP3Dw;
         points_t mvP3Dw;
 
-        // Index in Frame
+//      Index in Frame
         vector<size_t> mvKeyPointIndices;
 
-        // Current Estimation
-        double mRi[3][3];
-        double mti[3];
+//      Current Estimation
+        double mRi[3][3]{};
+        double mti[3]{};
         Eigen::Matrix4f mTcwi;
-        vector<bool> mvbInliersi;
-        int mnInliersi;
+        vector<bool> mvbInnersi;
+        int mnInnersi;
 
-        // Current Ransac State
+//      Current Ransac State
         int mnIterations;
-        vector<bool> mvbBestInliers;
-        int mnBestInliers;
+        vector<bool> mvbBestInners;
+        int mnBestInners;
         Eigen::Matrix4f mBestTcw;
 
-        // Refined
+//      Refined
         Eigen::Matrix4f mRefinedTcw;
-        vector<bool> mvbRefinedInliers;
-        int mnRefinedInliers;
+        vector<bool> mvbRefinedInners;
+        int mnRefinedInners{};
 
-        // Number of Correspondences
+//      Number of Correspondences
         int N;
 
-        // Indices for random selection [0 .. N-1]
+//      Indices for random selection [0 .. N-1]
         vector<size_t> mvAllIndices;
 
-        // RANSAC probability
-        double mRansacProb;
+//      RANSAC probability
+        double mRansacProb{};
 
-        // RANSAC min inliers
-        int mRansacMinInliers;
+//      RANSAC min inners
+        int mRansacMinInners{};
 
-        // RANSAC max iterations
-        int mRansacMaxIts;
+//      RANSAC max iterations
+        int mRansacMaxIts{};
 
-        // RANSAC expected inliers/total ratio
-        float mRansacEpsilon;
+//      RANSAC expected inners/total ratio
+        float mRansacEpsilon{};
 
-        // RANSAC Threshold inlier/outlier. Max error e = dist(P1,T_12*P2)^2
-        float mRansacTh;
+//      RANSAC Threshold inner/outlier. Max error e = dist(P1,T_12*P2)^2
+        float mRansacTh{};
 
-        // RANSAC Minimun Set used at each iteration
-        int mRansacMinSet;
+//      RANSAC Minimum Set used at each iteration
+        int mRansacMinSet{};
 
-        // Max square error associated with scale level. Max error = th*th*sigma(level)*sigma(level)
+//      Max square error associated with scale level. Max error = th*th*sigma(level)*sigma(level)
         vector<float> mvMaxError;
 
-        GeometricCamera* mpCamera;
+        GeometricCamera *mpCamera;
     };
-
 }
 
-
-
-
-#endif //ORB_SLAM3_MLPNPSOLVER_H
+#endif  // ORB_SLAM3_MLPNPSOLVER_H

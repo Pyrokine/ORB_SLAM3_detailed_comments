@@ -44,45 +44,40 @@ const int colsRedIm = reductionFactor * 848;
 const int rowsRedIm = reductionFactor * 800;
 
 
-void exit_loop_handler(int s){
+void exit_loop_handler(int s) {
     cout << "Finishing session" << endl;
     b_continue_session = false;
 }
 
-static rs2_option get_sensor_option(const rs2::sensor& sensor)
-{
-    // Sensors usually have several options to control their properties
-    //  such as Exposure, Brightness etc.
+static rs2_option get_sensor_option(const rs2::sensor &sensor) {
+//    Sensors usually have several options to control their properties
+//    such as Exposure, Brightness etc.
 
     std::cout << "Sensor supports the following options:\n" << std::endl;
 
-    // The following loop shows how to iterate over all available options
-    // Starting from 0 until RS2_OPTION_COUNT (exclusive)
-    for (int i = 0; i < static_cast<int>(RS2_OPTION_COUNT); i++)
-    {
+//    The following loop shows how to iterate over all available options
+//    Starting from 0 until RS2_OPTION_COUNT (exclusive)
+    for (int i = 0; i < static_cast<int>(RS2_OPTION_COUNT); ++i) {
         rs2_option option_type = static_cast<rs2_option>(i);
-        //SDK enum types can be streamed to get a string that represents them
+//        SDK enum types can be streamed to get a string that represents them
         std::cout << "  " << i << ": " << option_type;
 
-        // To control an option, use the following api:
+//        To control an option, use the following api:
 
-        // First, verify that the sensor actually supports this option
-        if (sensor.supports(option_type))
-        {
+//        First, verify that the sensor actually supports this option
+        if (sensor.supports(option_type)) {
             std::cout << std::endl;
 
-            // Get a human readable description of the option
-            const char* description = sensor.get_option_description(option_type);
+//            Get a human readable description of the option
+            const char *description = sensor.get_option_description(option_type);
             std::cout << "       Description   : " << description << std::endl;
 
-            // Get the current value of the option
+//            Get the current value of the option
             float current_value = sensor.get_option(option_type);
             std::cout << "       Current Value : " << current_value << std::endl;
 
-            //To change the value of an option, please follow the change_sensor_option() function
-        }
-        else
-        {
+//            To change the value of an option, please follow the change_sensor_option() function
+        } else {
             std::cout << " is not supported" << std::endl;
         }
     }
@@ -109,21 +104,21 @@ int main(int argc, char **argv) {
     sigemptyset(&sigIntHandler.sa_mask);
     sigIntHandler.sa_flags = 0;
 
-    sigaction(SIGINT, &sigIntHandler, NULL);
+    sigaction(SIGINT, &sigIntHandler, nullptr);
     b_continue_session = true;
 
-    double offset = 0; // ms
+    double offset = 0;  // ms
 
-    // Declare RealSense pipeline, encapsulating the actual device and sensors
+//    Declare RealSense pipeline, encapsulating the actual device and sensors
     rs2::pipeline pipe;
-    // Create a configuration for configuring the pipeline with a non default profile
+//    Create a configuration for configuring the pipeline with a non default profile
     rs2::config cfg;
-    cfg.enable_stream(RS2_STREAM_FISHEYE, 1, RS2_FORMAT_Y8,30);
-    cfg.enable_stream(RS2_STREAM_FISHEYE, 2, RS2_FORMAT_Y8,30);
-    cfg.enable_stream(RS2_STREAM_ACCEL, RS2_FORMAT_MOTION_XYZ32F); //, 250); // 63
-    cfg.enable_stream(RS2_STREAM_GYRO, RS2_FORMAT_MOTION_XYZ32F); //, 400);
+    cfg.enable_stream(RS2_STREAM_FISHEYE, 1, RS2_FORMAT_Y8, 30);
+    cfg.enable_stream(RS2_STREAM_FISHEYE, 2, RS2_FORMAT_Y8, 30);
+    cfg.enable_stream(RS2_STREAM_ACCEL, RS2_FORMAT_MOTION_XYZ32F);  // , 250);  // 63
+    cfg.enable_stream(RS2_STREAM_GYRO, RS2_FORMAT_MOTION_XYZ32F);  // , 400);
 
-    // IMU callback
+//    IMU callback
     std::mutex imu_mutex;
     std::condition_variable cond_image_rec;
 
@@ -138,36 +133,29 @@ int main(int argc, char **argv) {
     bool image_ready = false;
 
 
-    auto imu_callback = [&](const rs2::frame& frame)
-    {
+    auto imu_callback = [&](const rs2::frame &frame) {
         std::unique_lock<std::mutex> lock(imu_mutex);
 
-        if(rs2::frameset fs = frame.as<rs2::frameset>())
-        {
+        if (rs2::frameset fs = frame.as<rs2::frameset>()) {
             rs2::video_frame color_frame_left = fs.get_fisheye_frame(1);
             rs2::video_frame color_frame_right = fs.get_fisheye_frame(2);
-            imCV_left = cv::Mat(cv::Size(width_img, height_img), CV_8U, (void*)(color_frame_left.get_data()), cv::Mat::AUTO_STEP);
-            imCV_right = cv::Mat(cv::Size(width_img, height_img), CV_8U, (void*)(color_frame_right.get_data()), cv::Mat::AUTO_STEP);
+            imCV_left = cv::Mat(cv::Size(width_img, height_img), CV_8U, (void *) (color_frame_left.get_data()), cv::Mat::AUTO_STEP);
+            imCV_right = cv::Mat(cv::Size(width_img, height_img), CV_8U, (void *) (color_frame_right.get_data()), cv::Mat::AUTO_STEP);
 
-            timestamp_image = fs.get_timestamp()*1e-3;
+            timestamp_image = fs.get_timestamp() * 1e-3;
             image_ready = true;
 
             lock.unlock();
             cond_image_rec.notify_all();
-        }
-        else if (rs2::motion_frame m_frame = frame.as<rs2::motion_frame>())
-        {
-            if (m_frame.get_profile().stream_name() == "Gyro")
-            {
-                // It runs at 200Hz
+        } else if (rs2::motion_frame m_frame = frame.as<rs2::motion_frame>()) {
+            if (m_frame.get_profile().stream_name() == "Gyro") {
+//                It runs at 200Hz
                 v_gyro_data.push_back(m_frame.get_motion_data());
-                v_gyro_timestamp.push_back((m_frame.get_timestamp()+offset)*1e-3);
-            }
-            else if (m_frame.get_profile().stream_name() == "Accel")
-            {
-                // It runs at 60Hz
+                v_gyro_timestamp.push_back((m_frame.get_timestamp() + offset) * 1e-3);
+            } else if (m_frame.get_profile().stream_name() == "Accel") {
+//                It runs at 60Hz
                 v_acc_data.push_back(m_frame.get_motion_data());
-                v_acc_timestamp.push_back((m_frame.get_timestamp()+offset)*1e-3);
+                v_acc_timestamp.push_back((m_frame.get_timestamp() + offset) * 1e-3);
             }
         }
     };
@@ -183,27 +171,27 @@ int main(int argc, char **argv) {
 
     cv::Mat imLeft, imRight;
     ofstream accFile, gyroFile, cam0TsFile, cam1TsFile;
-    accFile.open (directory + "/IMU/acc.txt");
-    gyroFile.open (directory + "/IMU/gyro.txt");
-    cam0TsFile.open (directory + "/cam0/times.txt");
-    cam1TsFile.open (directory + "/cam1/times.txt");
+    accFile.open(directory + "/IMU/acc.txt");
+    gyroFile.open(directory + "/IMU/gyro.txt");
+    cam0TsFile.open(directory + "/cam0/times.txt");
+    cam1TsFile.open(directory + "/cam1/times.txt");
 
     cout << directory + "/IMU/acc.txt" << endl;
 
-    if(!accFile.is_open() || ! gyroFile.is_open() || !cam0TsFile.is_open()){
+    if (!accFile.is_open() || !gyroFile.is_open() || !cam0TsFile.is_open()) {
         cerr << "FILES NOT OPENED" << endl;
         exit(-1);
     }
 
-    // Clear IMU vectors
+//    Clear IMU vectors
     v_gyro_data.clear();
     v_gyro_timestamp.clear();
     v_acc_data.clear();
     v_acc_timestamp.clear();
 
-    cv::namedWindow("cam0",cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("cam0", cv::WINDOW_AUTOSIZE);
 
-    while (b_continue_session){
+    while (b_continue_session) {
         std::vector<rs2_vector> vGyro;
         std::vector<double> vGyro_times;
         std::vector<rs2_vector> vAccel, vAccel_Sync;
@@ -212,28 +200,28 @@ int main(int argc, char **argv) {
         {
             {
                 std::unique_lock<std::mutex> lk(imu_mutex);
-                if (!image_ready) // wait until image read from the other thread
+                if (!image_ready)// wait until image read from the other thread
                     cond_image_rec.wait(lk);
             }
             std::lock_guard<std::mutex> lk(imu_mutex);
 
-            // Copy the IMU data to local single thread variables
+//            Copy the IMU data to local single thread variables
             vGyro = v_gyro_data;
             vGyro_times = v_gyro_timestamp;
             vAccel = v_acc_data;
             vAccel_times = v_acc_timestamp;
             imTs = timestamp_image;
 
-            if(reductionFactor == 1.0) {
+            if (reductionFactor == 1.0) {
                 imLeft = imCV_left.clone();
                 imRight = imCV_right.clone();
             } else {
-                cv::resize(imCV_left, imLeft, cv::Size(colsRedIm,rowsRedIm));
-                cv::resize(imCV_right, imRight, cv::Size(colsRedIm,rowsRedIm));
+                cv::resize(imCV_left, imLeft, cv::Size(colsRedIm, rowsRedIm));
+                cv::resize(imCV_right, imRight, cv::Size(colsRedIm, rowsRedIm));
             }
 
 
-            // Clear IMU vectors
+//            Clear IMU vectors
             v_gyro_data.clear();
             v_gyro_timestamp.clear();
             v_acc_data.clear();
@@ -242,13 +230,13 @@ int main(int argc, char **argv) {
             image_ready = false;
         }
 
-        cv::imshow("cam0",imLeft);
-        cv::imshow("cam1",imRight);
+        cv::imshow("cam0", imLeft);
+        cv::imshow("cam1", imRight);
 
-        // save image and IMU data
-        long int imTsInt = (long int) (1e9*imTs);
+//        save image and IMU data
+        long int imTsInt = (long int) (1e9 * imTs);
         string imgRepoLeft = directory + "/cam0/" + to_string(imTsInt) + ".png";
-        if(!imLeft.empty()) {
+        if (!imLeft.empty()) {
             cv::imwrite(imgRepoLeft, imLeft);
             cam0TsFile << imTsInt << endl;
         } else {
@@ -256,21 +244,21 @@ int main(int argc, char **argv) {
         }
 
         string imgRepoRight = directory + "/cam1/" + to_string(imTsInt) + ".png";
-        if(!imRight.empty()) {
+        if (!imRight.empty()) {
             cv::imwrite(imgRepoRight, imRight);
             cam1TsFile << imTsInt << endl;
         } else {
             cout << "right image empty!! \n";
         }
 
-        //assert(vAccel.size() == vAccel_times.size());
-        //assert(vGyro.size() == vGyro_times.size());
+//        assert(vAccel.size() == vAccel_times.size());
+//        assert(vGyro.size() == vGyro_times.size());
 
-        for(int i=0; i<vAccel.size(); ++i){
+        for (int i = 0; i < vAccel.size(); ++i) {
             accFile << std::setprecision(15) << vAccel_times[i] << "," << vAccel[i].x << "," << vAccel[i].y << "," << vAccel[i].z << endl;
         }
 
-        for(int i=0; i<vGyro.size(); ++i){
+        for (int i = 0; i < vGyro.size(); ++i) {
             gyroFile << std::setprecision(15) << vGyro_times[i] << "," << vGyro[i].x << "," << vGyro[i].y << "," << vGyro[i].z << endl;
         }
 

@@ -13,7 +13,7 @@ This is a modified version of orb.cpp of OpenCV library. The original code is BS
 This is a modified version of the epnp.h and epnp.cc of Vincent Lepetit. 
 This code can be found in popular BSD licensed computer vision libraries as [OpenCV](https://github.com/Itseez/opencv/blob/master/modules/calib3d/src/epnp.cpp) and [OpenGV](https://github.com/laurentkneip/opengv/blob/master/src/absolute_pose/modules/Epnp.cpp). The original code is FreeBSD.
 
-* *MLPnPsolver.h, MLPnPsolver.cc*.
+* *MLPnPSolver.h, MLPnPSolver.cc*.
 This is a modified version of the MLPnP of Steffen Urban from [here](https://github.com/urbste/opengv). 
 The original code is BSD licensed.
 
