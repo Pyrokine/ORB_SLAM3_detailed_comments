@@ -31,8 +31,8 @@
 
 #include<opencv2/core/core.hpp>
 
-#include"../../../include/System.h"
-#include"../include/ImuTypes.h"
+#include"include/System.h"
+#include"include/ImuTypes.h"
 
 using namespace std;
 
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
   bool bEqual = false;
   if(argc < 3 || argc > 4)
   {
-    cerr << endl << "Usage: rosrun ORB_SLAM3 Mono_Inertial path_to_vocabulary path_to_settings [do_equalize]" << endl;
+    cerr << endl << "Usage: rosrun ORB_SLAM3_dense Mono_Inertial path_to_vocabulary path_to_settings [do_equalize]" << endl;
     ros::shutdown();
     return 1;
   }
@@ -98,8 +98,8 @@ int main(int argc, char **argv)
   // ros::Subscriber sub_imu = n.subscribe("/imu", 1000, &ImuGrabber::GrabImu, &imugb); 
   // ros::Subscriber sub_img0 = n.subscribe("/camera/image_raw", 100, &ImageGrabber::GrabImage,&igb);
   // 以下为EUROC
-  ros::Subscriber sub_imu = n.subscribe("/imu0", 1000, &ImuGrabber::GrabImu, &imugb); 
-  ros::Subscriber sub_img0 = n.subscribe("/cam0/image_raw", 100, &ImageGrabber::GrabImage,&igb);
+  ros::Subscriber sub_imu = n.subscribe("/camera/imu", 1000, &ImuGrabber::GrabImu, &imugb);
+  ros::Subscriber sub_img0 = n.subscribe("/camera/color/image_raw", 100, &ImageGrabber::GrabImage,&igb);
 
   std::thread sync_thread(&ImageGrabber::SyncWithImu,&igb);
 

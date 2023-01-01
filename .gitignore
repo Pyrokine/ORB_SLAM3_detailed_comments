@@ -18,15 +18,15 @@ Examples/Monocular-Inertial/mono_inertial_tum_vi
 Examples/Stereo-Inertial/stereo_inertial_euroc
 Examples/Stereo-Inertial/stereo_inertial_tum_vi
 
-Examples/ROS/ORB_SLAM3/Mono
-Examples/ROS/ORB_SLAM3/Mono_Inertial
-Examples/ROS/ORB_SLAM3/MonoAR
-Examples/ROS/ORB_SLAM3/RGBD
-Examples/ROS/ORB_SLAM3/Stereo
-Examples/ROS/ORB_SLAM3/Stereo_Inertial
+Examples/ROS/ORB_SLAM3_dense/Mono
+Examples/ROS/ORB_SLAM3_dense/Mono_Inertial
+Examples/ROS/ORB_SLAM3_dense/MonoAR
+Examples/ROS/ORB_SLAM3_dense/RGBD
+Examples/ROS/ORB_SLAM3_dense/Stereo
+Examples/ROS/ORB_SLAM3_dense/Stereo_Inertial
 
-Examples/ROS/ORB_SLAM3/CMakeLists.txt.user
-Examples/ROS/ORB_SLAM3/build/
+Examples/ROS/ORB_SLAM3_dense/CMakeLists.txt.user
+Examples/ROS/ORB_SLAM3_dense/build/
 
 Examples_old/RGB-D/rgbd_tum_old
 
@@ -71,10 +71,12 @@ lib/
 
 cmake_modules/
 cmake-build-debug/
+cmake-build-release/
 
 *.pyc
 *.osa
 .vscode/settings.json
 .vscode/c_cpp_properties.json
-.vscode/settings.json
-.vscode/settings.json
+
+.idea/
+!.gitkeep

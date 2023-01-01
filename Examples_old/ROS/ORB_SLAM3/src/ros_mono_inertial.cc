@@ -75,7 +75,7 @@ int main(int argc, char **argv)
   bool bEqual = false;
   if(argc < 3 || argc > 4)
   {
-    cerr << endl << "Usage: rosrun ORB_SLAM3 Mono_Inertial path_to_vocabulary path_to_settings [do_equalize]" << endl;
+    cerr << endl << "Usage: rosrun ORB_SLAM3_dense Mono_Inertial path_to_vocabulary path_to_settings [do_equalize]" << endl;
     ros::shutdown();
     return 1;
   }

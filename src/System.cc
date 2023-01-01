@@ -77,7 +77,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
     //Check settings file
     // Step 2 读取配置文件
-    cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
+    cv::FileStorage fsSettings(strSettingsFile, cv::FileStorage::READ);
     // 如果打开失败，就输出错误信息
     if(!fsSettings.isOpened())
     {
@@ -89,6 +89,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     cv::FileNode node = fsSettings["File.version"];
     if(!node.empty() && node.isString() && node.string() == "1.0")
     {
+        cout << "File version: 1.0" << endl;
         settings_ = new Settings(strSettingsFile,mSensor);
 
         // 保存及加载地图的名字
@@ -99,6 +100,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     }
     else
     {
+        cout << "File version: " << node.string() << endl;
         settings_ = nullptr;
         cv::FileNode node = fsSettings["System.LoadAtlasFromFile"];
         if(!node.empty() && node.isString())
@@ -259,7 +261,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     // 创建并开启显示线程
     if(bUseViewer)
     {
-        mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile);
+        mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile, settings_);
         mptViewer = new thread(&Viewer::Run, mpViewer);
         mpTracker->SetViewer(mpViewer);
         mpLoopCloser->mpViewer = mpViewer;

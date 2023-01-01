@@ -108,7 +108,7 @@ string Settings::readParameter<string>(cv::FileStorage &fSettings, const std::st
         {
             std::cerr << name << " optional parameter does not exist..." << std::endl;
             found = false;
-            return string();
+            return {};
         }
     }
     else if (!node.isString())
